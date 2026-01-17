@@ -178,6 +178,18 @@ export default function StoryCanvas() {
                 isOpen={!!selectedNode}
                 onClose={() => setSelectedNode(null)}
                 data={selectedNode}
+                onDataDelete={async (item) => {
+                    if (!confirm('Are you sure you want to delete this?')) return;
+                    try {
+                        const endpoint = item.type === 'edge' ? `/edges/${item.id}` : `/nodes/${item.id}`;
+                        await apiClient.delete(endpoint);
+                        setSelectedNode(null);
+                        fetchData(); // Refresh graph
+                    } catch (e) {
+                        console.error('Delete failed', e);
+                        alert('Failed to delete item.');
+                    }
+                }}
             />
             {caseId && (
                 <AddEntityModal

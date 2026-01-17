@@ -19,7 +19,7 @@ interface TeamManagerProps {
 }
 
 export default function TeamManager({ caseId, onClose }: TeamManagerProps) {
-    const { user, users } = useAuth();
+    const { users } = useAuth();
     const [members, setMembers] = useState<TeamMember[]>([]);
     const [selectedUser, setSelectedUser] = useState('');
     const [selectedRole, setSelectedRole] = useState('INVESTIGATOR');

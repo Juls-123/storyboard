@@ -49,6 +49,7 @@ COPY --from=builder /app/server/node_modules ./node_modules
 # Environment
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV DATABASE_URL="file:/app/data/forensics.db"
 
 # Expose api
 EXPOSE 3001

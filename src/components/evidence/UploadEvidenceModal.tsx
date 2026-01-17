@@ -15,6 +15,7 @@ export default function UploadEvidenceModal({ isOpen, onClose, onUploadComplete 
     const [caseId, setCaseId] = useState('');
     const [cases, setCases] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string>(''); // Hooks must be before return
 
     useEffect(() => {
         if (isOpen) {
@@ -28,7 +29,13 @@ export default function UploadEvidenceModal({ isOpen, onClose, onUploadComplete 
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             if (!label) setLabel(file.name);
-            // In a real app, we'd enable the upload button only now
+
+            // Read file for preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -44,7 +51,8 @@ export default function UploadEvidenceModal({ isOpen, onClose, onUploadComplete 
                 caseId,
                 type: fileType,
                 label,
-                hash: Math.random().toString(36).substring(7)
+                hash: Math.random().toString(36).substring(7),
+                url: previewUrl // Send Base64 data
             });
             onUploadComplete();
             onClose();

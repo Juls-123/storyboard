@@ -61,24 +61,31 @@ export default function StoryCanvas() {
             if (data.nodes) {
                 setNodes(data.nodes.map((n: any) => ({
                     id: n.id,
-                    type: 'entity', // Ensure type is entity for Custom Node
+                    type: 'entity',
                     position: { x: n.x, y: n.y },
                     data: {
+                        id: n.id,
                         label: n.label,
-                        type: n.type, // Visual variant (person, etc)
+                        type: n.type,
                         detail: n.detail,
-                        id_short: n.id.substring(0, 8)
+                        id_short: n.id.substring(0, 8),
+                        meta: n.data ? JSON.parse(n.data) : {}
                     }
                 })));
             }
             if (data.edges) {
-                setEdges(data.edges.map((e: any) => ({
+                // Determine if this is first load to apply delay
+                const mappedEdges = data.edges.map((e: any) => ({
                     id: e.id,
                     source: e.sourceId,
                     target: e.targetId,
                     label: e.label,
                     style: { stroke: '#4a5059', strokeWidth: 1 }
-                })));
+                }));
+                // HACK: Small delay ensuring nodes are registered before edges connect
+                setTimeout(() => {
+                    setEdges(mappedEdges);
+                }, 50);
             }
         } catch (err) {
             console.error("Failed to load graph:", err);

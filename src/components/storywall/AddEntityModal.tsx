@@ -16,6 +16,8 @@ export default function AddEntityModal({ isOpen, caseId, onClose, onEntityCreate
     const [type, setType] = useState('person');
     const [loading, setLoading] = useState(false);
 
+    const [evidenceId, setEvidenceId] = useState('');
+
     // Evidence Selection
     const [evidenceList, setEvidenceList] = useState<any[]>([]);
 
@@ -29,6 +31,8 @@ export default function AddEntityModal({ isOpen, caseId, onClose, onEntityCreate
 
     const handleEvidenceSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedId = e.target.value;
+        setEvidenceId(selectedId);
+
         const item = evidenceList.find(i => i.id === selectedId);
         if (item) {
             setLabel(item.label);
@@ -50,8 +54,12 @@ export default function AddEntityModal({ isOpen, caseId, onClose, onEntityCreate
                 type,
                 label,
                 detail,
-                x: Math.random() * 500, // Random position near center
-                y: Math.random() * 500
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+                data: type === 'evidence' ? JSON.stringify({
+                    evidenceType: evidenceList.find(i => i.id === evidenceId)?.type || 'unknown',
+                    previewUrl: evidenceList.find(i => i.id === evidenceId)?.url || undefined
+                }) : undefined
             });
             onEntityCreated();
             onClose();
@@ -99,6 +107,7 @@ export default function AddEntityModal({ isOpen, caseId, onClose, onEntityCreate
                                 </div>
                             ) : (
                                 <select
+                                    value={evidenceId}
                                     onChange={handleEvidenceSelect}
                                     className={styles.select}
                                     style={{ background: '#0a0a0a', border: '1px solid #333', padding: '12px', color: '#eee' }}

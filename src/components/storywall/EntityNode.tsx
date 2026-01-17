@@ -69,9 +69,24 @@ export default function EntityNode({ data, selected }: NodeProps) {
                 )}
 
                 {data.type === 'evidence' && (
-                    <div className={styles.content}>
-                        {Icon}
-                        <div className={styles.label}>{data.label as string}</div>
+                    <div className={styles.content} style={{ padding: 0, overflow: 'hidden' }}>
+                        {(data.meta as any)?.previewUrl ? (
+                            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                <img
+                                    src={(data.meta as any).previewUrl}
+                                    alt="Preview"
+                                    style={{ width: '100%', height: '100px', objectFit: 'cover', opacity: 0.8 }}
+                                />
+                                <div className={styles.label} style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(0,0,0,0.7)', padding: '4px' }}>
+                                    {data.label as string}
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {Icon}
+                                <div className={styles.label}>{data.label as string}</div>
+                            </>
+                        )}
                     </div>
                 )}
             </div>

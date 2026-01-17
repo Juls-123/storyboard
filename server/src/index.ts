@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 // --- ROUTES ---
 import path from 'path';
@@ -336,9 +336,9 @@ app.get('/api/nodes', async (req, res) => {
 
 app.post('/api/nodes', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
     try {
-        const { caseId, type, label, detail, x, y } = req.body;
+        const { caseId, type, label, detail, x, y, data } = req.body;
         const node = await prisma.node.create({
-            data: { caseId, type, label, detail, x, y }
+            data: { caseId, type, label, detail, x, y, data }
         });
         await prisma.auditLog.create({
             data: {
@@ -524,9 +524,10 @@ app.put('/api/hypotheses/:id/status', async (req, res) => {
 app.get('/api/evidence', async (req, res) => {
     try {
         const { caseId } = req.query;
-        if (!caseId) return res.status(400).json({ error: 'Case ID required' });
+        // if (!caseId) return res.status(400).json({ error: 'Case ID required' }); // Allow global view
+        const where = caseId ? { caseId: String(caseId) } : {};
         const items = await prisma.evidence.findMany({
-            where: { caseId: String(caseId) },
+            where,
             orderBy: { createdAt: 'desc' }
         });
         res.json(items);
@@ -537,9 +538,9 @@ app.get('/api/evidence', async (req, res) => {
 
 app.post('/api/evidence', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
     try {
-        const { caseId, label, type, hash } = req.body;
+        const { caseId, label, type, hash, url } = req.body;
         const item = await prisma.evidence.create({
-            data: { caseId, label, type, hash }
+            data: { caseId, label, type, hash, url }
         });
         await prisma.auditLog.create({
             data: {
@@ -553,6 +554,25 @@ app.post('/api/evidence', authorize(['OWNER', 'INVESTIGATOR']), async (req: any,
         res.json(item);
     } catch (error) {
         console.error(error);
+        res.status(500).json({ error: 'Failed' });
+    }
+});
+
+app.delete('/api/evidence/:id', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
+    try {
+        const { id } = req.params;
+        await prisma.evidence.delete({ where: { id } });
+        await prisma.auditLog.create({
+            data: {
+                caseId: req.body.caseId, // Might be null if not passed, but that's ok
+                action: 'DELETE_EVIDENCE',
+                details: `Deleted evidence ID: ${id}`,
+                user: req.user.name,
+                userId: req.user.id
+            }
+        });
+        res.json({ success: true });
+    } catch (error) {
         res.status(500).json({ error: 'Failed' });
     }
 });

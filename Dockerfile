@@ -52,4 +52,4 @@ ENV PORT=3001
 EXPOSE 3001
 
 # Start
-CMD ["node", "server/dist/index.js"]
+CMD ["sh", "-c", "npx prisma db push --schema ./prisma/schema.prisma && node server/dist/index.js"]

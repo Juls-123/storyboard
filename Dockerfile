@@ -1,6 +1,8 @@
 # Build Stage
 FROM node:20-alpine AS builder
 WORKDIR /app
+# Install OpenSSL for Prisma generation
+RUN apk add --no-cache openssl
 
 # Copy root package files
 COPY package*.json ./

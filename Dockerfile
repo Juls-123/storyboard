@@ -33,6 +33,8 @@ WORKDIR /app
 # Copy backend deps
 COPY --from=builder /app/server/package*.json ./
 RUN npm install --production
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
 
 # Copy built assets
 COPY --from=builder /app/dist ./dist

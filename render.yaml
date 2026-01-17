@@ -4,7 +4,6 @@ services:
     env: docker
     plan: free
     buildCommand: docker build -t storyboard .
-    startCommand: npx prisma db push --schema ./prisma/schema.prisma && docker run -p $PORT:3001 -e PORT=$PORT -e DATABASE_URL=file:/app/data/forensics.db storyboard
     envVars:
       - key: JWT_SECRET
         generateValue: true

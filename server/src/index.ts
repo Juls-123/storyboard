@@ -534,7 +534,7 @@ app.get('/api/audit-logs', async (req, res) => {
 
 // Catch-all for React Router (must be last)
 if (process.env.NODE_ENV === 'production') {
-    app.get('(.*)', (req, res) => {
+    app.get(/[\s\S]*/, (req, res) => {
         res.sendFile(path.join(__dirname, '../../dist/index.html'));
     });
 }

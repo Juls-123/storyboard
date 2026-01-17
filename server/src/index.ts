@@ -102,12 +102,15 @@ app.post('/api/auth/signup', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
         const code = Math.floor(100000 + Math.random() * 900000).toString();
 
+        const userCount = await prisma.user.count();
+        const role = userCount === 0 ? 'OWNER' : 'ANALYST';
+
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
-                role: 'ANALYST', // Default role
+                role,
                 verificationCode: code
             }
         });

@@ -396,6 +396,38 @@ app.put('/api/nodes/:id', authorize(['OWNER', 'INVESTIGATOR']), async (req: any,
 });
 
 // 3. EDGES
+app.delete('/api/nodes/:id', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
+    try {
+        const { id } = req.params;
+        const node = await prisma.node.delete({ where: { id } });
+
+        await prisma.auditLog.create({
+            data: {
+                caseId: node.caseId,
+                action: 'DELETE_ENTITY',
+                details: `Deleted entity: ${node.label} (${node.type})`,
+                user: req.user.name,
+                userId: req.user.id
+            }
+        });
+        res.json({ success: true, id });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to delete node' });
+    }
+});
+
+app.delete('/api/edges/:id', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
+    try {
+        const { id } = req.params;
+        const edge = await prisma.edge.delete({ where: { id } });
+        res.json({ success: true, id });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to delete edge' });
+    }
+});
+
 app.post('/api/edges', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
     try {
         const { caseId, sourceId, targetId, label } = req.body;

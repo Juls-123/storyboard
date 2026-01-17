@@ -50,5 +50,14 @@ export const apiClient = {
         });
         if (!res.ok) throw new Error(res.statusText);
         return res.json();
+    },
+
+    delete: async (endpoint: string) => {
+        const res = await fetch(`${API_URL}${endpoint}`, {
+            method: 'DELETE',
+            headers
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
     }
 };

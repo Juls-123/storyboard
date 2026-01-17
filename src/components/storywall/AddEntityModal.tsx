@@ -58,7 +58,6 @@ export default function AddEntityModal({ isOpen, caseId, onClose, onEntityCreate
             setLabel('');
             setDetail('');
         } catch (error) {
-        } catch (error) {
             console.error('Failed to add entity:', error);
             alert('Failed to add entity. Please check your network or permissions.');
         } finally {

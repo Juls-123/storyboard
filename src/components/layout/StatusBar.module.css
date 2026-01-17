@@ -1,0 +1,95 @@
+.statusBar {
+    height: var(--header-height);
+    background-color: var(--color-bg-panel);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-lg);
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    user-select: none;
+    z-index: 100;
+}
+
+.left,
+.right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    cursor: default;
+}
+
+.item:hover {
+    opacity: 1;
+}
+
+.item span {
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+.item.actionable {
+    cursor: pointer;
+    padding: 4px 8px;
+    background: var(--color-bg-hover);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+}
+
+.item.actionable:hover {
+    background: var(--color-bg-active);
+}
+
+.indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    /* Square LED look */
+    background-color: var(--color-text-muted);
+}
+
+.online {
+    background-color: var(--color-accent-teal);
+    box-shadow: 0 0 8px var(--color-accent-teal-dim);
+}
+
+.secure {
+    color: var(--color-accent-blue);
+}
+
+.divider {
+    width: 1px;
+    height: 16px;
+    background-color: var(--color-border);
+}
+
+.logoutBtn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    margin-left: 12px;
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.logoutBtn:hover {
+    border-color: var(--color-accent-red);
+    color: var(--color-accent-red);
+    background: rgba(239, 68, 68, 0.1);
+}

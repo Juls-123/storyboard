@@ -1,0 +1,47 @@
+.hud {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 6px;
+    display: flex;
+    gap: 4px;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.button {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.button:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.active {
+    background-color: var(--color-bg-hover);
+    color: var(--color-accent-blue);
+}
+
+.separator {
+    width: 1px;
+    height: 24px;
+    background-color: var(--color-border);
+    align-self: center;
+    margin: 0 4px;
+}

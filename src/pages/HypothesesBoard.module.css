@@ -1,0 +1,143 @@
+.container {
+    padding: var(--spacing-xl);
+    height: 100%;
+    overflow-y: auto;
+}
+
+.header {
+    margin-bottom: var(--spacing-xl);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--spacing-lg);
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: var(--color-text-primary);
+}
+
+.subtitle {
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: var(--spacing-xl);
+}
+
+.card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    /* Sharp */
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+    border-color: var(--color-border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background-color: var(--color-bg-hover);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-md);
+}
+
+.hTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    line-height: 1.4;
+    font-family: var(--font-header);
+}
+
+.statusBadge {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    border: 1px solid transparent;
+}
+
+.open {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-accent-blue);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.supported {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-accent-teal);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.rejected {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-accent-red);
+    border-color: rgba(239, 68, 68, 0.2);
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.weak {
+    background-color: var(--color-bg-active);
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+}
+
+.description {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: var(--spacing-lg);
+}
+
+.evidenceList {
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+}
+
+.evidenceHeader {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.evidenceItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+}
+
+.contradiction {
+    color: var(--color-accent-red);
+}

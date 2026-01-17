@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: storyboard-app
+    env: docker
+    plan: free
+    buildCommand: docker build -t storyboard .
+    startCommand: docker run -p $PORT:3001 -e PORT=$PORT -e DATABASE_URL=file:/app/prisma/forensics.db storyboard
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: sqlite-data
+      mountPath: /app/prisma
+      sizeGB: 1

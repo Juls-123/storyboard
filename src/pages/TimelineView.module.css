@@ -1,0 +1,173 @@
+.container {
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--color-bg-app) 0%, rgba(9, 9, 11, 0.95) 100%);
+}
+
+.header {
+    padding: var(--spacing-xl);
+    padding-bottom: 0;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text-primary);
+}
+
+.subtitle {
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.streamContainer {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-xl);
+    gap: 6rem;
+    /* Wider Cinematic/Timeline spacing */
+    cursor: grab;
+}
+
+.streamContainer:active {
+    cursor: grabbing;
+}
+
+/* The horizontal line */
+.timelineLine {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 55%;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            var(--color-border) 20%,
+            var(--color-border) 80%,
+            transparent 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.dayGroup {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+    padding-top: 40px;
+}
+
+.dateLabel {
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-family: var(--font-header);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-left: 2px solid var(--color-accent-blue);
+    padding-left: var(--spacing-sm);
+}
+
+.eventCard {
+    width: 280px;
+    background-color: var(--color-bg-card);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--color-border);
+    border-top: 2px solid transparent;
+    padding: var(--spacing-lg);
+    position: relative;
+    transition: all 0.3s var(--ease-spring);
+    z-index: 1;
+    opacity: 0.9;
+    border-radius: var(--radius-sm);
+}
+
+.eventCard:hover {
+    transform: translateY(-8px);
+    opacity: 1;
+    border-color: var(--color-border-hover);
+    border-top-color: var(--color-accent-blue);
+    background-color: var(--color-bg-hover);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Connection dot */
+.eventCard::before {
+    content: '';
+    position: absolute;
+    bottom: -32px;
+    /* Adjusted alignment */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    background: var(--color-text-muted);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.eventCard:hover::before {
+    background: var(--color-accent-blue);
+    box-shadow: 0 0 8px var(--color-accent-blue);
+}
+
+.verified {
+    border-top-color: var(--color-accent-teal);
+}
+
+.critical {
+    border-top-color: var(--color-accent-amber);
+}
+
+.eventHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+}
+
+.eventTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.3;
+}
+
+.eventDesc {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.gap {
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    opacity: 0.5;
+}

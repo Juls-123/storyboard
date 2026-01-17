@@ -1,0 +1,92 @@
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--color-bg-panel);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-sm);
+    flex-shrink: 0;
+    z-index: 50;
+    user-select: none;
+    backdrop-filter: blur(10px);
+    /* Glassy feel */
+}
+
+.brand {
+    padding: var(--spacing-md) var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.title {
+    font-family: var(--font-header);
+    font-size: 0.95rem;
+    /* Slightly larger, more authoritative */
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+}
+
+.subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* Very tight list */
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 8px 12px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    /* Sharp corners */
+    transition: all 0.15s ease;
+    font-weight: 500;
+    border: 1px solid transparent;
+    /* Prevent layout shift on active */
+}
+
+.navItem:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.active {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-active);
+    /* Subtle border for active */
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.active .icon {
+    color: var(--color-accent-blue);
+    opacity: 1;
+}
+
+.navItem:hover .icon {
+    opacity: 1;
+}

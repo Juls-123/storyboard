@@ -1,0 +1,164 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal {
+    width: 600px;
+    background-color: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h3 {
+    font-size: 1.1rem;
+    color: var(--color-text-primary);
+}
+
+.icon {
+    color: var(--color-accent-blue);
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    display: flex;
+}
+
+.closeBtn:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.content {
+    padding: 24px;
+}
+
+.inviteSection {
+    margin-bottom: 32px;
+}
+
+.inviteSection h4,
+.listSection h4 {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 12px 0;
+}
+
+.inviteRow {
+    display: flex;
+    gap: 12px;
+}
+
+.select {
+    flex: 1;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--color-text-primary);
+    outline: none;
+}
+
+.select:focus {
+    border-color: var(--color-accent-blue);
+}
+
+.addBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--color-accent-blue);
+    color: #fff;
+    border: none;
+    padding: 0 16px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.addBtn:hover:not(:disabled) {
+    background-color: #2563eb;
+    /* Darker blue */
+}
+
+.addBtn:disabled {
+    background-color: var(--color-bg-active);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+}
+
+.memberList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.memberCard {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.memberInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.memberName {
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.memberRole {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-mono);
+}
+
+.empty,
+.loading {
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+    padding: 16px;
+    text-align: center;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+}

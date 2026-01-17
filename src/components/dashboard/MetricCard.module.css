@@ -1,0 +1,49 @@
+.card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Tighter gap */
+}
+
+/* No hovering borders for stats - keep them stable like dashboard instruments */
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--color-text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.icon {
+    width: 14px;
+    height: 14px;
+    color: var(--color-text-muted);
+}
+
+.value {
+    font-family: var(--font-sans);
+    /* Clean sans for big numbers */
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.trend {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--color-accent-teal);
+    background: var(--color-accent-teal-dim);
+    align-self: flex-start;
+    padding: 2px 6px;
+    border-radius: 4px;
+}

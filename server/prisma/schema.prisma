@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Case {
+  id        String   @id @default(uuid())
+  title     String
+  status    String   // active, dormant, closed
+  lead      String
+  summary   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  nodes     Node[]
+  edges     Edge[]
+  hypotheses Hypothesis[]
+  auditLogs  AuditLog[]
+  
+  ownerId   String?
+  owner     User?    @relation(fields: [ownerId], references: [id])
+  members   CaseMember[]
+  evidence  Evidence[]
+}
+
+model Node {
+  id        String   @id @default(uuid())
+  type      String   // person, device, location, evidence
+  label     String
+  detail    String?
+  data      String?  // JSON string for extra props
+  x         Float    @default(0)
+  y         Float    @default(0)
+  
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  outgoing  Edge[]   @relation("Source")
+  incoming  Edge[]   @relation("Target")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Edge {
+  id        String   @id @default(uuid())
+  label     String?
+  sourceId  String
+  targetId  String
+  
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  source    Node     @relation("Source", fields: [sourceId], references: [id], onDelete: Cascade)
+  target    Node     @relation("Target", fields: [targetId], references: [id], onDelete: Cascade)
+}
+
+model Hypothesis {
+  id        String   @id @default(uuid())
+  title     String
+  status    String   // open, supported, rejected
+  desc      String?
+  creator   String?  @default("Analyst")
+  
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // CREATE_CASE, ADD_NODE, etc.
+  details   String
+  user      String   @default("System")
+  
+  caseId    String?
+  case      Case?    @relation(fields: [caseId], references: [id])
+  
+  timestamp DateTime @default(now())
+  
+  userId    String?
+  actor     User?    @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   // OWNER, INVESTIGATOR, ANALYST
+  
+  isVerified       Boolean @default(false)
+  verificationCode String?
+
+  cases     Case[]
+  auditLogs AuditLog[]
+  
+  createdAt DateTime @default(now())
+  
+  memberships CaseMember[]
+}
+
+model Evidence {
+  id        String   @id @default(uuid())
+  label     String
+  type      String   // Digital Log, Audio, etc.
+  hash      String?
+  url       String?  // Path to file if we had storage
+  
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CaseMember {
+  id        String   @id @default(uuid())
+  role      String   // INVESTIGATOR, ANALYST
+  
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  joinedAt  DateTime @default(now())
+  
+  @@unique([caseId, userId])
+}

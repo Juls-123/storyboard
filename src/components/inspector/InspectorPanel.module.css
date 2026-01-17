@@ -1,0 +1,180 @@
+.panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 380px;
+    background-color: var(--color-bg-panel);
+    border-left: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    transition: transform 0.3s var(--ease-spring);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+
+.open {
+    transform: translateX(0);
+}
+
+.header {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg-hover);
+    /* Subtle contrast header */
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.typeBadge {
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-active);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.entityTitle {
+    font-size: 1.4rem;
+    /* Larger, bolder */
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sectionTitle {
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    font-weight: 700;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+}
+
+.propertyList {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* Tighter list */
+}
+
+.property {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.property:last-child {
+    border-bottom: none;
+}
+
+.label {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.value {
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.closeButton:hover {
+    background: var(--color-bg-active);
+    color: var(--color-text-primary);
+}
+
+.iconButton {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.iconButton:hover {
+    background: var(--color-bg-active);
+    color: var(--color-text-primary);
+}
+
+.editInputTitle {
+    background: var(--color-bg-app);
+    border: 1px solid var(--color-border-active);
+    color: var(--color-text-primary);
+    font-family: var(--font-header);
+    font-size: 1.4rem;
+    font-weight: 700;
+    padding: 8px;
+    width: 100%;
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+}
+
+.editTextarea {
+    background: var(--color-bg-app);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-family: var(--font-mono);
+    padding: 12px;
+    width: 100%;
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.editTextarea:focus,
+.editInputTitle:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    background: var(--color-bg-active);
+}

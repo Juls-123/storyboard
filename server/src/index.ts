@@ -49,28 +49,16 @@ const getAuthUser = async (req: express.Request, res: express.Response, next: ex
 // Middleware Factory
 const authorize = (roles: string[]) => {
     return async (req: any, res: any, next: any) => {
-        const userId = req.headers['x-user-id'] as string;
-        console.log(`[AUTH] Checking UserID: ${userId} against Roles: ${roles}`);
+        // AUTH REMOVAL: Bypass all checks
+        console.log(`[AUTH] Bypassing auth for ${req.path}`);
 
-        if (!userId) {
-            console.log('[AUTH] No User ID');
-            return res.status(401).json({ error: 'No user ID provided' });
-        }
-
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user) {
-            console.log('[AUTH] User Not Found in DB');
-            return res.status(401).json({ error: 'User not found' });
-        }
-
-        console.log(`[AUTH] User: ${user.name}, Role: ${user.role}`);
-
-        if (!roles.includes(user.role)) {
-            console.log('[AUTH] Insufficient Permissions');
-            return res.status(403).json({ error: 'Insufficient permissions' });
-        }
-
-        req.user = user; // Attach user to request
+        // Mock User
+        req.user = {
+            id: 'commander-id',
+            name: 'Commander',
+            email: 'admin@ncis.gov',
+            role: 'OWNER'
+        };
         next();
     };
 };

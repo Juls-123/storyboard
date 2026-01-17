@@ -31,39 +31,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('token');
-        if (storedUser && storedToken) {
-            setUser(JSON.parse(storedUser));
-            apiClient.setAuthToken(storedToken);
-        }
+        // AUTH REMOVAL: Auto-login
+        const mockUser: User = {
+            id: 'commander-id',
+            name: 'Commander',
+            email: 'admin@ncis.gov',
+            role: 'OWNER'
+        };
+        setUser(mockUser);
         setIsLoading(false);
     }, []);
 
     const login = async (email: string, pass: string) => {
-        const data = await apiClient.post('/auth/login', { email, password: pass });
-        // Response is { user: {...}, token: "..." }
-        setUser(data.user);
-        apiClient.setAuthToken(data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
+        // No-op
     };
 
     const signup = async (name: string, email: string, pass: string) => {
-        const data = await apiClient.post('/auth/signup', { name, email, password: pass });
-        return data.userId;
+        return 'commander-id';
     };
 
-    const verify = async (email: string, code: string) => {
-        await apiClient.post('/auth/verify', { email, code });
-    };
+    const verify = async (email: string, code: string) => { };
 
     const logout = () => {
-        setUser(null);
-        apiClient.setAuthToken('');
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+        window.location.reload();
     };
 
     const hasPermission = (requiredRoles: Role[]) => {

@@ -27,12 +27,12 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/verify" element={<VerificationPage />} />
+          {/* Public Routes - Redirect to Dashboard */}
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/verify" element={<Navigate to="/dashboard" replace />} />
 
-          {/* Protected Routes */}
+          {/* Protected Routes - Now Open */}
           <Route element={<RequireAuth />}>
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />

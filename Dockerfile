@@ -21,6 +21,8 @@ RUN npm run build
 
 # Build Backend
 WORKDIR /app/server
+# Set dummy DATABASE_URL for prisma generate to work during build
+ENV DATABASE_URL="file:./dev.db"
 RUN npm run build
 # The backend build output is in /app/server/dist (implied ts-node or tsc)
 # Actually, we run with ts-node in dev, but for prod we should compile.

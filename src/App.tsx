@@ -9,10 +9,10 @@ import TimelineView from './pages/TimelineView';
 import HypothesesBoard from './pages/HypothesesBoard';
 import AuditLog from './pages/AuditLog';
 
-// Auth Pages
-import LoginPage from './pages/auth/LoginPage';
-import SignupPage from './pages/auth/SignupPage';
-import VerificationPage from './pages/auth/VerificationPage';
+// Auth Pages - Removed
+// import LoginPage from './pages/auth/LoginPage';
+// import SignupPage from './pages/auth/SignupPage';
+// import VerificationPage from './pages/auth/VerificationPage';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
 

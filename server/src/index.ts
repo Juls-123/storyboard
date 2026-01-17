@@ -52,6 +52,24 @@ const authorize = (roles: string[]) => {
         // AUTH REMOVAL: Bypass all checks
         console.log(`[AUTH] Bypassing auth for ${req.path}`);
 
+        // Ensure Commander exists for Foreign Key constraints
+        try {
+            await prisma.user.upsert({
+                where: { id: 'commander-id' },
+                update: {},
+                create: {
+                    id: 'commander-id',
+                    name: 'Commander',
+                    email: 'admin@ncis.gov',
+                    password: 'bypass-mode-active',
+                    role: 'OWNER',
+                    isVerified: true
+                }
+            });
+        } catch (e) {
+            console.error('Failed to upsert commander:', e);
+        }
+
         // Mock User
         req.user = {
             id: 'commander-id',

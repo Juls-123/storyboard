@@ -50,6 +50,7 @@ COPY --from=builder /app/server/node_modules ./node_modules
 ENV NODE_ENV=production
 ENV PORT=3001
 ENV DATABASE_URL="file:/app/data/forensics.db"
+ENV UPLOAD_DIR="/app/data/uploads"
 
 # Expose api
 EXPOSE 3001

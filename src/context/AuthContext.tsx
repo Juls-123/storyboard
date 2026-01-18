@@ -31,30 +31,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // AUTO LOGIN for No-Auth Mode
-        const autoLogin = async () => {
-            // Just trigger a fetch to ensure backend is awake/seeded, then set dummy user
-            // We can hit /api/users to wake it up
-            try {
-                await apiClient.get('/health');
-                setUser({
-                    id: 'mock-id',
-                    name: 'Director Vance',
-                    role: 'OWNER',
-                    email: 'vance@ncis.gov'
-                });
-            } catch (e) { console.error(e); }
-            setIsLoading(false);
-        };
-        autoLogin();
+        // Check for existing session
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+
+        if (token && userData) {
+            setUser(JSON.parse(userData));
+            apiClient.setToken(token);
+        }
+        setIsLoading(false);
     }, []);
 
-    const login = async (_email: string, _pass: string) => {
-        // No-op
+    const login = async (email: string, pass: string) => {
+        try {
+            const { token, user } = await apiClient.post('/auth/login', { email, password: pass });
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            apiClient.setToken(token);
+            setUser(user);
+        } catch (e: any) {
+            console.error(e);
+            throw new Error(e.message || 'Login failed');
+        }
     };
 
-    const signup = async (_name: string, _email: string, _pass: string) => {
-        return "mock-id";
+    const signup = async (name: string, email: string, pass: string) => {
+        try {
+            const { token, user } = await apiClient.post('/auth/signup', { name, email, password: pass });
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            apiClient.setToken(token);
+            setUser(user);
+            return user.id;
+        } catch (e: any) {
+            console.error(e);
+            throw new Error(e.message || 'Signup failed');
+        }
     };
 
     const verify = async (_email: string, _code: string) => {

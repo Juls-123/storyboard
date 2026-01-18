@@ -1,0 +1,89 @@
+.item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 1rem;
+    transition: all 0.2s;
+}
+
+.item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.key {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    font-family: 'Courier New', monospace;
+}
+
+.confidence {
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.value {
+    font-size: 1rem;
+    color: #f1f5f9;
+    margin-bottom: 0.75rem;
+    word-break: break-word;
+}
+
+.source {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+}
+
+.sourceLabel {
+    color: #64748b;
+    font-family: 'Courier New', monospace;
+}
+
+.sourceValue {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.dates {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.625rem;
+}
+
+.dateLabel {
+    color: #64748b;
+    font-family: 'Courier New', monospace;
+}
+
+.dateValue {
+    color: #94a3b8;
+    font-family: 'Courier New', monospace;
+}
+
+.evidence {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.meter {
+    margin-top: 0.5rem;
+}

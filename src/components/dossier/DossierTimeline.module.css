@@ -1,0 +1,145 @@
+.timeline {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.5rem;
+    position: relative;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    font-family: 'Courier New', monospace;
+}
+
+.count {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    padding: 0.125rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.controls {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.scrollBtn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.scrollBtn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #f1f5f9;
+}
+
+.track {
+    flex: 1;
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.5rem 0;
+    scroll-behavior: smooth;
+}
+
+.track::-webkit-scrollbar {
+    height: 4px;
+}
+
+.track::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.track::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.event {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+
+.marker {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+    z-index: 1;
+}
+
+.marker[data-type="system"] .dot {
+    background: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.marker[data-type="note"] .dot {
+    background: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.3);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.line {
+    width: 2rem;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0.1));
+    margin-left: 4px;
+}
+
+.eventContent {
+    text-align: center;
+}
+
+.eventDate {
+    font-size: 0.625rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    font-family: 'Courier New', monospace;
+}
+
+.eventLabel {
+    font-size: 0.75rem;
+    color: #e2e8f0;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

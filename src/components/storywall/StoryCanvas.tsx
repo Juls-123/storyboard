@@ -20,6 +20,7 @@ import InspectorPanel from '../inspector/InspectorPanel';
 import CanvasToolbar from './CanvasToolbar';
 import AddEntityModal from './AddEntityModal';
 import TeamManager from '../case/TeamManager';
+import EntityTooltip from './EntityTooltip';
 import { apiClient } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 
@@ -31,9 +32,11 @@ export default function StoryCanvas() {
     const [searchParams] = useSearchParams();
     const caseId = searchParams.get('caseId'); // Fixed param name to match Dashboard
 
-    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
     const [selectedNode, setSelectedNode] = useState<any>(null);
+    const [tooltipNode, setTooltipNode] = useState<any>(null);
+    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
 
@@ -53,25 +56,40 @@ export default function StoryCanvas() {
         );
     }
 
+    const [caseTitle, setCaseTitle] = useState('');
+
     // Fetch Graph Data
     const fetchData = useCallback(async () => {
         if (!caseId) return;
         try {
             const data = await apiClient.get(`/cases/${caseId}`);
+            if (data.title) {
+                setCaseTitle(data.title);
+            }
             if (data.nodes) {
-                setNodes(data.nodes.map((n: any) => ({
-                    id: n.id,
-                    type: 'entity',
-                    position: { x: n.x, y: n.y },
-                    data: {
-                        id: n.id,
-                        label: n.label,
-                        type: n.type,
-                        detail: n.detail,
-                        id_short: n.id.substring(0, 8),
-                        meta: n.data ? JSON.parse(n.data) : {}
+                setNodes(data.nodes.map((n: any) => {
+                    let parsedMeta = {};
+                    try {
+                        parsedMeta = n.data ? JSON.parse(n.data) : {};
+                    } catch (e) {
+                        console.error('Failed to parse node data for node:', n.id, e);
+                        parsedMeta = {};
                     }
-                })));
+                    return {
+                        id: n.id,
+                        type: 'entity',
+                        position: { x: n.x, y: n.y },
+                        data: {
+                            id: n.id,
+                            label: n.label || 'Unnamed',
+                            type: n.type || 'unknown',
+                            detail: n.detail || '',
+                            id_short: n.id.substring(0, 8),
+                            meta: parsedMeta,
+                            ...parsedMeta // Spread to make profilePicture accessible at top level
+                        }
+                    };
+                }));
             }
             if (data.edges) {
                 // Determine if this is first load to apply delay
@@ -100,22 +118,55 @@ export default function StoryCanvas() {
 
 
     const onConnect = useCallback(
-        (params: Connection) => {
-            setEdges((eds) => addEdge(params, eds));
-            if (caseId && params.source && params.target) {
-                apiClient.post('/edges', {
+        async (connection: any) => {
+            console.log('onConnect called with:', connection);
+            console.log('caseId:', caseId);
+
+            if (!caseId) {
+                console.error('No caseId available');
+                return;
+            }
+
+            // Persist to backend first
+            try {
+                console.log('Sending edge creation request...');
+                const savedEdge = await apiClient.post('/edges', {
+                    sourceId: connection.source,
+                    targetId: connection.target,
                     caseId,
-                    sourceId: params.source,
-                    targetId: params.target,
                     label: 'RELATED_TO'
-                }).catch(err => console.error("Failed to create edge:", err));
+                });
+
+                console.log('Edge saved successfully:', savedEdge);
+
+                // Add edge to UI with the real ID from database
+                const newEdge = {
+                    id: savedEdge.id,
+                    source: connection.source,
+                    target: connection.target,
+                    label: savedEdge.label || 'RELATED_TO',
+                    style: { stroke: '#4a5059', strokeWidth: 1 }
+                };
+
+                setEdges((eds) => [...eds, newEdge]);
+            } catch (err: any) {
+                console.error('Failed to save edge:', err);
+                const errorMessage = err.response?.data?.error || err.message;
+                const errorDetails = err.response?.data?.details || '';
+                alert(`Failed to create connection:\n${errorMessage}\n${errorDetails}`);
             }
         },
         [setEdges, caseId],
     );
 
-    const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-        setSelectedNode(node.data);
+    const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+        // Calculate position for tooltip (offset from node)
+        const rect = (event.target as HTMLElement).getBoundingClientRect();
+        setTooltipPosition({
+            x: rect.right + 10, // 10px to the right of the node
+            y: rect.top
+        });
+        setTooltipNode(node.data);
     }, []);
 
     const onEdgeClick = useCallback((_: React.MouseEvent, edge: any) => {
@@ -125,10 +176,12 @@ export default function StoryCanvas() {
             label: edge.label || 'RELATED_TO',
             detail: `Source: ${edge.source}\nTarget: ${edge.target}`
         });
+        setTooltipNode(null);
     }, []);
 
     const onPaneClick = useCallback(() => {
         setSelectedNode(null);
+        setTooltipNode(null);
     }, []);
 
     const onNodeDragStop = useCallback((_: React.MouseEvent, node: Node) => {
@@ -196,6 +249,32 @@ export default function StoryCanvas() {
                     style={{ backgroundColor: '#101012', border: '1px solid #27272a' }}
                 />
             </ReactFlow>
+
+            {/* Case Title Header */}
+            <div style={{
+                position: 'absolute',
+                top: 24,
+                left: 24,
+                padding: '8px 16px',
+                background: 'rgba(24, 24, 27, 0.8)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid #27272a',
+                borderRadius: '8px',
+                color: '#e4e4e7',
+                fontSize: '14px',
+                fontWeight: 500,
+                zIndex: 100,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                pointerEvents: 'none' // Click through to canvas
+            }}>
+                <span style={{ color: '#71717a' }}>OPERATION:</span>
+                <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {caseTitle || 'Loading...'}
+                </span>
+            </div>
+
             <CanvasToolbar
                 onAddNode={() => setIsAddModalOpen(true)}
                 onManageTeam={() => setIsTeamModalOpen(true)}
@@ -232,6 +311,18 @@ export default function StoryCanvas() {
                 <TeamManager
                     caseId={caseId}
                     onClose={() => setIsTeamModalOpen(false)}
+                />
+            )}
+
+            {tooltipNode && (
+                <EntityTooltip
+                    node={tooltipNode}
+                    position={tooltipPosition}
+                    onClose={() => setTooltipNode(null)}
+                    onEdit={() => {
+                        setSelectedNode(tooltipNode);
+                        setTooltipNode(null);
+                    }}
                 />
             )}
         </div>

@@ -35,7 +35,9 @@ export const apiClient = {
         });
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.error || res.statusText);
+            const error = new Error(err.error || res.statusText);
+            (error as any).response = { data: err }; // Attach full response data for UI to use
+            throw error;
         }
         return res.json();
     },
@@ -46,7 +48,12 @@ export const apiClient = {
             headers,
             body: JSON.stringify(body)
         });
-        if (!res.ok) throw new Error(res.statusText);
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            const error = new Error(err.error || res.statusText);
+            (error as any).response = { data: err };
+            throw error;
+        }
         return res.json();
     },
 
@@ -55,7 +62,12 @@ export const apiClient = {
             method: 'DELETE',
             headers
         });
-        if (!res.ok) throw new Error(res.statusText);
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            const error = new Error(err.error || res.statusText);
+            (error as any).response = { data: err };
+            throw error;
+        }
         return res.json();
     }
 };

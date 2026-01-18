@@ -1,5 +1,5 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { User, Smartphone, MapPin, FileText, Globe, Server } from 'lucide-react';
+import { User, Smartphone, MapPin, FileText, Globe, Server, Building2, HelpCircle } from 'lucide-react';
 import clsx from 'clsx';
 import styles from './EntityNode.module.css';
 
@@ -10,6 +10,7 @@ const getVariant = (type: string) => {
         case 'device': return 'deviceNode';
         case 'location': return 'locationNode';
         case 'evidence': return 'evidenceNode';
+        case 'organization': return 'organizationNode';
         default: return 'baseNode';
     }
 };
@@ -22,7 +23,8 @@ const getIcon = (type: string) => {
         case 'evidence': return <FileText size={14} />;
         case 'network': return <Globe size={14} />;
         case 'server': return <Server size={14} />;
-        default: return <FileText size={14} />;
+        case 'organization': return <Building2 size={14} />;
+        default: return <HelpCircle size={14} />;
     }
 };
 
@@ -37,9 +39,26 @@ export default function EntityNode({ data, selected }: NodeProps) {
             <div className={clsx(styles.baseNode, variantClass)}>
                 {data.type === 'person' && (
                     <>
-                        <div className={styles.iconWrapper}>{Icon}</div>
+                        {data.profilePicture ? (
+                            <div className={styles.profilePicture}>
+                                <img src={data.profilePicture} alt={data.label as string} />
+                            </div>
+                        ) : (
+                            <div className={styles.iconWrapper}>{Icon}</div>
+                        )}
                         <div className={styles.label}>{data.label as string}</div>
-                        <div className={styles.detail}>{data.detail as string}</div>
+                    </>
+                )}
+
+                {data.type === 'organization' && (
+                    <>
+                        <div className={styles.header}>
+                            {Icon}
+                            <span>ORG</span>
+                        </div>
+                        <div className={styles.content}>
+                            <div className={styles.label}>{data.label as string}</div>
+                        </div>
                     </>
                 )}
 
@@ -87,6 +106,14 @@ export default function EntityNode({ data, selected }: NodeProps) {
                                 <div className={styles.label}>{data.label as string}</div>
                             </>
                         )}
+                    </div>
+                )}
+
+                {/* Fallback for unknown types */}
+                {!['person', 'device', 'location', 'evidence', 'organization'].includes(data.type as string) && (
+                    <div style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {Icon}
+                        <div className={styles.label}>{data.label as string || 'Unknown Entity'}</div>
                     </div>
                 )}
             </div>

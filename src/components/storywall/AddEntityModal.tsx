@@ -59,7 +59,7 @@ export default function AddEntityModal({ isOpen, caseId, onClose, onEntityCreate
                 data: type === 'evidence' ? JSON.stringify({
                     evidenceType: evidenceList.find(i => i.id === evidenceId)?.type || 'unknown',
                     previewUrl: evidenceList.find(i => i.id === evidenceId)?.url || undefined
-                }) : undefined
+                }) : JSON.stringify({}) // Ensure valid JSON string is always sent
             });
             onEntityCreated();
             onClose();

@@ -1,0 +1,66 @@
+.meter {
+    position: relative;
+    margin: 0.5rem 0;
+}
+
+.track {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.fill {
+    height: 100%;
+    transition: width 0.5s ease-out, background 0.3s;
+    position: relative;
+    border-radius: 6px;
+}
+
+.glow {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.markers {
+    position: relative;
+    height: 16px;
+    margin-top: 4px;
+}
+
+.marker {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 0.625rem;
+    color: #64748b;
+    font-family: 'Courier New', monospace;
+}
+
+.marker::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+}

@@ -56,6 +56,16 @@ export default function Dashboard() {
         navigate(`/story-wall?caseId=${id}`);
     };
 
+    const handleArchiveCase = async (id: string) => {
+        try {
+            await apiClient.put(`/cases/${id}`, { status: 'closed' });
+            window.location.reload(); // Simple refresh to reflect changes
+        } catch (error) {
+            console.error('Failed to archive', error);
+            alert('Failed to close operation. Check permissions.');
+        }
+    };
+
     return (
         <div className={styles.container}>
             <header className={styles.header}>
@@ -71,6 +81,7 @@ export default function Dashboard() {
             </header>
 
             <div className={styles.metricsGrid}>
+                {/* ... existing metrics ... */}
                 <MetricCard
                     label="ACTIVE OPERATIONS"
                     value={stats.active.toString().padStart(2, '0')}
@@ -113,6 +124,7 @@ export default function Dashboard() {
                                         evidenceCount: c.nodes?.filter((n: any) => n.type === 'evidence').length || 0
                                     }}
                                     onClick={() => handleCaseClick(c.id)}
+                                    onArchive={handleArchiveCase}
                                 />
                             ))
                         )}

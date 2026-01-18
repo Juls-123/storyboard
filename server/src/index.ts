@@ -4,18 +4,39 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import multer from 'multer';
+import fs from 'fs';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret-key'; // In prod use env
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads');
+
+// Ensure upload dir exists
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// --- ROUTES ---
-import path from 'path';
+// File Upload Configuration
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
+const upload = multer({ storage });
+
+// Serve Static Files
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 // Serve static frontend in production
 if (process.env.NODE_ENV === 'production') {
@@ -30,23 +51,6 @@ app.get('/api/health', (req, res) => {
 });
 
 // --- RBAC MIDDLEWARE & SEEDING ---
-
-// Middleware to simulate getting user from header
-// Middleware to simulate getting user from header
-const getAuthUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // ALWAYS force a user
-    try {
-        let user = await prisma.user.findFirst({ where: { email: 'vance@ncis.gov' } });
-        if (!user) {
-            await seedUsers();
-            user = await prisma.user.findFirst({ where: { email: 'vance@ncis.gov' } });
-        }
-        (req as any).user = user;
-    } catch (e) {
-        console.error("Auth Bypass Error", e);
-    }
-    next();
-};
 
 // --- SEEDING & UTILS ---
 
@@ -74,17 +78,31 @@ const seedUsers = async () => {
 };
 
 // Middleware Factory
-// Middleware Factory - BYPASSED
 const authorize = (roles: string[]) => {
     return async (req: any, res: any, next: any) => {
-        // Just rely on getAuthUser to have populated req.user
-        if (!req.user) {
-            return res.status(401).json({ error: 'Auth Init Failed' });
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ error: 'No token provided' });
         }
-        // Optional: Still enforce role checks if you want "Mock Roles" to matter
-        // if (roles.length > 0 && !roles.includes(req.user.role)) { ... }
 
-        next();
+        const token = authHeader.split(' ')[1];
+        try {
+            const decoded: any = jwt.verify(token, JWT_SECRET);
+            const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+
+            if (!user) {
+                return res.status(401).json({ error: 'User not found' });
+            }
+
+            if (roles.length > 0 && !roles.includes(user.role)) {
+                return res.status(403).json({ error: 'Insufficient permissions' });
+            }
+
+            req.user = user;
+            next();
+        } catch (error) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
     };
 };
 
@@ -140,6 +158,23 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
+app.post('/api/upload', authorize(['OWNER', 'INVESTIGATOR']), upload.single('file'), (req: any, res: any) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        res.json({
+            filename: req.file.filename,
+            url: `/uploads/${req.file.filename}`,
+            mimetype: req.file.mimetype,
+            size: req.file.size
+        });
+    } catch (error) {
+        console.error('Upload Error:', error);
+        res.status(500).json({ error: 'Failed to upload file' });
+    }
+});
+
 app.get('/api/users', authorize([]), async (req, res) => {
     try {
         const users = await prisma.user.findMany({
@@ -151,18 +186,15 @@ app.get('/api/users', authorize([]), async (req, res) => {
     }
 });
 
+// ============================================
+// ENTITY-CENTRIC ROUTES
+// ============================================
+import entityRoutes from './entity-routes';
+app.use('/api', authorize(['OWNER', 'INVESTIGATOR', 'ANALYST']), entityRoutes);
 
-// Users Endpoint for Frontend Switcher
-app.get('/api/users', async (req, res) => {
-    try {
-        let users = await prisma.user.findMany();
-        res.json(users);
-    } catch (e) {
-        res.status(500).json({ error: 'Failed' });
-    }
-});
-
-app.use(getAuthUser); // Globally applied for bypass
+// ============================================
+// LEGACY NODE ROUTES (Backward Compatibility)
+// ============================================
 
 // 1. CASES
 app.get('/api/cases', authorize([]), async (req: any, res: any) => {
@@ -176,7 +208,13 @@ app.get('/api/cases', authorize([]), async (req: any, res: any) => {
                 ]
             },
             orderBy: { updatedAt: 'desc' },
-            include: { nodes: true, edges: true, hypotheses: true, auditLogs: true }
+            include: {
+                nodes: true,
+                edges: true,
+                hypotheses: true,
+                auditLogs: true,
+                members: { include: { user: { select: { id: true, name: true } } } } // Include members for visibility
+            }
         });
         res.json(cases);
     } catch (error) {
@@ -210,18 +248,63 @@ app.post('/api/cases', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, re
     }
 });
 
-app.get('/api/cases/:id', async (req, res) => {
+app.get('/api/cases/:id', authorize([]), async (req: any, res: any) => {
     try {
         const { id } = req.params;
+        const userId = req.user.id;
+
         const caseData = await prisma.case.findUnique({
             where: { id },
-            include: { nodes: true, edges: true, hypotheses: true, auditLogs: true }
+            include: {
+                nodes: true,
+                edges: true,
+                hypotheses: true,
+                auditLogs: true,
+                members: true // load members to check access
+            }
         });
+
         if (!caseData) return res.status(404).json({ error: 'Case not found' });
+
+        // Access Control Check
+        const isOwner = caseData.ownerId === userId;
+        const isMember = caseData.members?.some((m: any) => m.userId === userId);
+
+        if (!isOwner && !isMember) {
+            return res.status(403).json({ error: 'Access denied to this operation.' });
+        }
+
         res.json(caseData);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to fetch case details' });
+    }
+});
+
+app.put('/api/cases/:id', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
+    try {
+        const { id } = req.params;
+        const { status, title, summary } = req.body;
+
+        const updatedCase = await prisma.case.update({
+            where: { id },
+            data: { status, title, summary }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                caseId: id,
+                action: 'UPDATE_CASE',
+                details: `Updated case status to ${status}`,
+                user: req.user.name,
+                userId: req.user.id
+            }
+        });
+
+        res.json(updatedCase);
+    } catch (error) {
+        console.error('[CASE UPDATE ERROR]', error);
+        res.status(500).json({ error: 'Failed to update case' });
     }
 });
 
@@ -237,8 +320,7 @@ app.get('/api/nodes', async (req, res) => {
 
         const nodes = await prisma.node.findMany({
             where,
-            orderBy: { createdAt: 'desc' },
-            include: { case: { select: { title: true } } }
+            orderBy: { createdAt: 'desc' }
         });
         res.json(nodes);
     } catch (error) {
@@ -249,9 +331,14 @@ app.get('/api/nodes', async (req, res) => {
 app.post('/api/nodes', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
     try {
         const { caseId, type, label, detail, x, y, data } = req.body;
+        console.log('[NODE CREATE] Request:', { caseId, type, label });
+
         const node = await prisma.node.create({
             data: { caseId, type, label, detail, x, y, data }
         });
+
+        console.log('[NODE CREATE] Success:', node.id);
+
         await prisma.auditLog.create({
             data: {
                 caseId,
@@ -262,9 +349,9 @@ app.post('/api/nodes', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, re
             }
         });
         res.json(node);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to create node' });
+    } catch (error: any) {
+        console.error('[NODE CREATE ERROR]', error);
+        res.status(500).json({ error: 'Failed to create node', details: error.message });
     }
 });
 
@@ -286,10 +373,10 @@ app.put('/api/nodes/:id/position', async (req, res) => {
 app.put('/api/nodes/:id', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
     try {
         const { id } = req.params;
-        const { detail, label } = req.body;
+        const { detail, label, data } = req.body;
         const node = await prisma.node.update({
             where: { id },
-            data: { detail, label }
+            data: { detail, label, data }
         });
         await prisma.auditLog.create({
             data: {
@@ -343,9 +430,28 @@ app.delete('/api/edges/:id', authorize(['OWNER', 'INVESTIGATOR']), async (req: a
 app.post('/api/edges', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, res: any) => {
     try {
         const { caseId, sourceId, targetId, label } = req.body;
+        console.log('[EDGE CREATE] Request body:', { caseId, sourceId, targetId, label });
+        console.log('[EDGE CREATE] User:', req.user);
+
+        // Validation: Check if nodes exist
+        const sourceNode = await prisma.node.findUnique({ where: { id: sourceId } });
+        const targetNode = await prisma.node.findUnique({ where: { id: targetId } });
+
+        if (!sourceNode) {
+            console.error(`[EDGE CREATE ERROR] Source Node not found: ${sourceId}`);
+            return res.status(404).json({ error: 'Source node not found', details: `Node ID ${sourceId} does not exist in database.` });
+        }
+        if (!targetNode) {
+            console.error(`[EDGE CREATE ERROR] Target Node not found: ${targetId}`);
+            return res.status(404).json({ error: 'Target node not found', details: `Node ID ${targetId} does not exist in database.` });
+        }
+
         const edge = await prisma.edge.create({
             data: { caseId, sourceId, targetId, label }
         });
+
+        console.log('[EDGE CREATE] Edge created:', edge);
+
         await prisma.auditLog.create({
             data: {
                 caseId,
@@ -356,9 +462,11 @@ app.post('/api/edges', authorize(['OWNER', 'INVESTIGATOR']), async (req: any, re
             }
         });
         res.json(edge);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to connect nodes' });
+    } catch (error: any) {
+        console.error('[EDGE CREATE ERROR]', error);
+        console.error('[EDGE CREATE ERROR] Message:', error.message);
+        console.error('[EDGE CREATE ERROR] Code:', error.code);
+        res.status(500).json({ error: 'Failed to connect nodes', details: error.message });
     }
 });
 
@@ -547,6 +655,19 @@ app.post('/api/cases/:id/members', authorize(['OWNER', 'INVESTIGATOR']), async (
         res.status(500).json({ error: 'Failed to add member' });
     }
 });
+
+// Seed users on first startup
+(async () => {
+    try {
+        const userCount = await prisma.user.count();
+        if (userCount === 0) {
+            await seedUsers();
+            console.log('✓ Default users seeded');
+        }
+    } catch (e) {
+        console.error('Seeding error:', e);
+    }
+})();
 
 app.listen(PORT, () => {
     console.log(`Forensic Core running on port ${PORT}`);

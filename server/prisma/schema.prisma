@@ -16,15 +16,19 @@ model Case {
   summary   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  nodes     Node[]
-  edges     Edge[]
+  nodes      Node[]
+  edges      Edge[]
   hypotheses Hypothesis[]
   auditLogs  AuditLog[]
   
-  ownerId   String?
-  owner     User?    @relation(fields: [ownerId], references: [id])
-  members   CaseMember[]
-  evidence  Evidence[]
+  ownerId    String?
+  owner      User?    @relation(fields: [ownerId], references: [id])
+  members    CaseMember[]
+  evidence   Evidence[]
+  
+  // Entity-Centric relations
+  entityLinks EntityCaseLink[]
+  storyNodes  StoryNode[]
 }
 
 model Node {
@@ -46,6 +50,169 @@ model Node {
   updatedAt DateTime @updatedAt
 }
 
+// ============================================
+// ENTITY-CENTRIC INVESTIGATION MODELS
+// ============================================
+
+model Entity {
+  id          String   @id @default(uuid())
+  type        String   // Person, Organization, Device, Account, Location, Event, Asset, Document
+  primaryName String
+  confidence  Float    @default(0.5) // 0.0 - 1.0
+  status      String   @default("ACTIVE") // ACTIVE, ARCHIVED, DISPUTED
+  
+  createdById String
+  createdBy   User     @relation("EntityCreator", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  attributes   EntityAttribute[]
+  notes        EntityNote[]
+  relationships EntityRelationship[] @relation("SourceEntity")
+  relatedFrom  EntityRelationship[] @relation("TargetEntity")
+  caseLinks    EntityCaseLink[]
+  storyNodes   StoryNode[]
+}
+
+model EntityAttribute {
+  id         String   @id @default(uuid())
+  entityId   String
+  entity     Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  
+  category   String   // Identity, Contact, Digital, Physical, Temporal
+  key        String   // "Full Name", "Phone", "Email", "DOB"
+  value      String
+  valueType  String   @default("text") // text, date, number, url, json
+  
+  confidence Float    @default(0.5)
+  source     String?  // Description of source
+  
+  firstSeen  DateTime @default(now())
+  lastSeen   DateTime @default(now())
+  
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  
+  // Evidence backing
+  evidenceLinks EvidenceLink[]
+  
+  // Version history (append-only)
+  supersededBy String?  @unique
+  supersedes   EntityAttribute? @relation("AttributeHistory", fields: [supersededBy], references: [id])
+  previousVersion EntityAttribute? @relation("AttributeHistory")
+  
+  @@index([entityId, category])
+}
+
+model EntityNote {
+  id        String   @id @default(uuid())
+  entityId  String
+  entity    Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  
+  content   String   // Free-text
+  category  String?  // Observation, Behavior, Context
+  
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  
+  evidenceLinks EvidenceLink[]
+}
+
+model EntityRelationship {
+  id            String   @id @default(uuid())
+  
+  sourceId      String
+  source        Entity   @relation("SourceEntity", fields: [sourceId], references: [id], onDelete: Cascade)
+  
+  targetId      String
+  target        Entity   @relation("TargetEntity", fields: [targetId], references: [id], onDelete: Cascade)
+  
+  relationshipType String // "Knows", "Owns", "Works For", "Related To", "Contacted"
+  direction     String   @default("BIDIRECTIONAL") // BIDIRECTIONAL, SOURCE_TO_TARGET
+  
+  confidence    Float    @default(0.5)
+  status        String   @default("ASSUMED") // CONFIRMED, ASSUMED, DISPUTED
+  
+  validFrom     DateTime?
+  validTo       DateTime?
+  
+  createdById   String
+  createdBy     User     @relation(fields: [createdById], references: [id])
+  createdAt     DateTime @default(now())
+  
+  evidenceLinks EvidenceLink[]
+  
+  @@index([sourceId])
+  @@index([targetId])
+}
+
+model EntityCaseLink {
+  id       String   @id @default(uuid())
+  
+  entityId String
+  entity   Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  
+  caseId   String
+  case     Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  role     String   @default("UNKNOWN") // SUSPECT, WITNESS, VICTIM, ASSET, UNKNOWN
+  notes    String?  // Case-specific notes
+  visibility String @default("TEAM") // TEAM, LEAD_ONLY, GLOBAL
+  
+  addedById String
+  addedBy   User    @relation(fields: [addedById], references: [id])
+  addedAt   DateTime @default(now())
+  
+  @@unique([entityId, caseId])
+}
+
+model StoryNode {
+  id       String @id @default(uuid())
+  
+  entityId String
+  entity   Entity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  
+  caseId   String
+  case     Case   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  x        Float  @default(0)
+  y        Float  @default(0)
+  
+  // outgoing Edge[] @relation("StorySource")
+  // incoming Edge[] @relation("StoryTarget")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([entityId, caseId])
+}
+
+model EvidenceLink {
+  id         String @id @default(uuid())
+  
+  evidenceId String
+  evidence   Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  
+  // Polymorphic link (one of these will be set)
+  attributeId     String?
+  attribute       EntityAttribute? @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  
+  noteId          String?
+  note            EntityNote? @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  
+  relationshipId  String?
+  relationship    EntityRelationship? @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+}
+
+// ============================================
+// END ENTITY-CENTRIC MODELS
+// ============================================
+
 model Edge {
   id        String   @id @default(uuid())
   label     String?
@@ -55,8 +222,14 @@ model Edge {
   caseId    String
   case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
-  source    Node     @relation("Source", fields: [sourceId], references: [id], onDelete: Cascade)
-  target    Node     @relation("Target", fields: [targetId], references: [id], onDelete: Cascade)
+  // Legacy Node relations (for backward compatibility)
+  source    Node?     @relation("Source", fields: [sourceId], references: [id], onDelete: Cascade)
+  target    Node?     @relation("Target", fields: [targetId], references: [id], onDelete: Cascade)
+  
+
+  // Entity-Centric StoryNode relations (REMOVED to prevent FK collision on sourceId)
+  // storySource StoryNode? @relation("StorySource", fields: [sourceId], references: [id], onDelete: Cascade)
+  // storyTarget StoryNode? @relation("StoryTarget", fields: [targetId], references: [id], onDelete: Cascade)
 }
 
 model Hypothesis {
@@ -98,7 +271,15 @@ model User {
   isVerified       Boolean @default(false)
   verificationCode String?
 
-  cases     Case[]
+  cases         Case[]
+  
+  // Entity-Centric relations
+  createdEntities     Entity[]             @relation("EntityCreator")
+  createdAttributes   EntityAttribute[]
+  createdNotes        EntityNote[]
+  createdRelationships EntityRelationship[]
+  addedEntityLinks    EntityCaseLink[]
+  
   auditLogs AuditLog[]
   
   createdAt DateTime @default(now())
@@ -117,7 +298,9 @@ model Evidence {
   case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
   
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
+  
+  evidenceLinks EvidenceLink[]
 }
 
 model CaseMember {

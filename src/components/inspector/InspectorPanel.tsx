@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, ExternalLink, Edit2, Save, XCircle, Trash2 } from 'lucide-react';
+import { X, ExternalLink, Edit2, Save, XCircle, Trash2, FileText } from 'lucide-react';
 import { apiClient } from '../../api/client';
 import clsx from 'clsx';
 import styles from './InspectorPanel.module.css';
@@ -76,7 +76,7 @@ export default function InspectorPanel({ isOpen, onClose, data, onDataDelete }: 
             // Actually, in 'StoryCanvas', we likely use the node.data object.
             // We need to send 'data' as a JSON STRING of the attributes to the backend.
 
-            const attributesWithPicture = { ...attributes, profilePicture };
+            const attributesWithPicture = { ...attributes, profilePicture, attachments }; // Store attachments in meta/data
             const payloadData = JSON.stringify(attributesWithPicture);
 
             const body = data.type === 'edge'
@@ -107,6 +107,57 @@ export default function InspectorPanel({ isOpen, onClose, data, onDataDelete }: 
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    // Attachments Logic
+    const [attachments, setAttachments] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (data && data.meta?.attachments) {
+            try {
+                const parsed = typeof data.meta.attachments === 'string'
+                    ? JSON.parse(data.meta.attachments)
+                    : data.meta.attachments;
+                setAttachments(Array.isArray(parsed) ? parsed : []);
+            } catch (e) {
+                setAttachments([]);
+            }
+        } else {
+            setAttachments([]);
+        }
+    }, [data]);
+
+    const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.length) return;
+
+        const files = Array.from(e.target.files);
+        const newAttachments: any[] = [];
+
+        try {
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await apiClient.post('/upload', formData as any); // Type assertion for FormData if needed
+                if (response) {
+                    // Assuming API returns { url, filename, size, mimetype }
+                    newAttachments.push({
+                        name: file.name,
+                        url: response.url,
+                        type: file.type,
+                        size: file.size
+                    });
+                }
+            }
+            setAttachments(prev => [...prev, ...newAttachments]);
+        } catch (error) {
+            console.error('Failed to upload attachments', error);
+            alert('Failed to upload file(s)');
+        }
+    };
+
+    const removeAttachment = (index: number) => {
+        setAttachments(prev => prev.filter((_, i) => i !== index));
     };
 
     const addAttribute = () => {
@@ -338,17 +389,57 @@ export default function InspectorPanel({ isOpen, onClose, data, onDataDelete }: 
                                                 id="attachment-upload"
                                                 className={styles.fileInput}
                                                 multiple
+                                                onChange={handleAttachmentUpload}
                                             />
                                             <label htmlFor="attachment-upload" className={styles.uploadLabel}>
                                                 <span>📎 Click to attach files</span>
                                                 <span className={styles.uploadHint}>or drag and drop</span>
                                             </label>
                                         </div>
+
+                                        {/* Attachment List (Edit Mode) */}
+                                        {attachments.length > 0 && (
+                                            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {attachments.map((file, idx) => (
+                                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', fontSize: '0.8rem' }}>
+                                                        <FileText size={14} color="#a1a1aa" />
+                                                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+                                                        <button onClick={() => removeAttachment(idx)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </>
                                 ) : (
-                                    <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-                                        {editDetail || data.detail || 'No additional notes provided.'}
-                                    </p>
+                                    <>
+                                        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                                            {editDetail || data.detail || 'No additional notes provided.'}
+                                        </p>
+
+                                        {/* Attachment List (View Mode) */}
+                                        {attachments.length > 0 && (
+                                            <div style={{ marginTop: '16px', borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
+                                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '8px' }}>ATTACHMENTS</div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {attachments.map((file, idx) => (
+                                                        <a
+                                                            key={idx}
+                                                            href={file.url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', textDecoration: 'none', color: 'var(--color-text-primary)' }}
+                                                        >
+                                                            <FileText size={14} color="var(--color-accent-blue)" />
+                                                            <span style={{ flex: 1, fontSize: '0.8rem' }}>{file.name}</span>
+                                                            <ExternalLink size={12} color="var(--color-text-muted)" />
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </>
                         )}

@@ -146,7 +146,4 @@ export default function EntityNode({ data, selected }: NodeProps) {
     );
 }
 
-<Handle type="source" position={Position.Bottom} className={styles.handle} />
-            </div >
-            );
-}
+

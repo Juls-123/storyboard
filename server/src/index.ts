@@ -32,16 +32,18 @@ app.get('/api/health', (req, res) => {
 // --- RBAC MIDDLEWARE & SEEDING ---
 
 // Middleware to simulate getting user from header
+// Middleware to simulate getting user from header
 const getAuthUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const userId = req.headers['x-user-id'] as string;
-    if (!userId) {
-        // Default to Analyst for demo purposes if no header
-        // In real app: return res.status(401).json({ error: 'Unauthorized' });
-        // checking if we have any users, if not, create default
-        try {
-            const count = await prisma.user.count();
-            if (count === 0) await seedUsers();
-        } catch (e) { }
+    // ALWAYS force a user
+    try {
+        let user = await prisma.user.findFirst({ where: { email: 'vance@ncis.gov' } });
+        if (!user) {
+            await seedUsers();
+            user = await prisma.user.findFirst({ where: { email: 'vance@ncis.gov' } });
+        }
+        (req as any).user = user;
+    } catch (e) {
+        console.error("Auth Bypass Error", e);
     }
     next();
 };
@@ -72,35 +74,17 @@ const seedUsers = async () => {
 };
 
 // Middleware Factory
+// Middleware Factory - BYPASSED
 const authorize = (roles: string[]) => {
     return async (req: any, res: any, next: any) => {
-        const authHeader = req.headers.authorization;
-        if (!authHeader) {
-            // Attempt auto-seed if empty database is hit on first request (optional dev convenience)
-            try {
-                await seedUsers();
-            } catch (e) { }
-            return res.status(401).json({ error: 'No token provided' });
+        // Just rely on getAuthUser to have populated req.user
+        if (!req.user) {
+            return res.status(401).json({ error: 'Auth Init Failed' });
         }
+        // Optional: Still enforce role checks if you want "Mock Roles" to matter
+        // if (roles.length > 0 && !roles.includes(req.user.role)) { ... }
 
-        const token = authHeader.split(' ')[1];
-        try {
-            const decoded: any = jwt.verify(token, JWT_SECRET);
-            const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
-
-            if (!user) {
-                return res.status(401).json({ error: 'User not found' });
-            }
-
-            if (roles.length > 0 && !roles.includes(user.role)) {
-                return res.status(403).json({ error: 'Insufficient permissions' });
-            }
-
-            req.user = user;
-            next();
-        } catch (error) {
-            return res.status(401).json({ error: 'Invalid token' });
-        }
+        next();
     };
 };
 
@@ -178,7 +162,7 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-// app.use(getAuthUser); // Legacy middleware removed
+app.use(getAuthUser); // Globally applied for bypass
 
 // 1. CASES
 app.get('/api/cases', authorize([]), async (req: any, res: any) => {

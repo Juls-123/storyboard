@@ -31,40 +31,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
-        if (token && userData) {
-            setUser(JSON.parse(userData));
-            apiClient.setToken(token); // Ensure client has token
-        }
-        setIsLoading(false);
+        // AUTO LOGIN for No-Auth Mode
+        const autoLogin = async () => {
+            // Just trigger a fetch to ensure backend is awake/seeded, then set dummy user
+            // We can hit /api/users to wake it up
+            try {
+                await apiClient.get('/health');
+                setUser({
+                    id: 'mock-id',
+                    name: 'Director Vance',
+                    role: 'OWNER',
+                    email: 'vance@ncis.gov'
+                });
+            } catch (e) { console.error(e); }
+            setIsLoading(false);
+        };
+        autoLogin();
     }, []);
 
     const login = async (email: string, pass: string) => {
-        try {
-            const { token, user } = await apiClient.post('/auth/login', { email, password: pass });
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-            apiClient.setToken(token);
-            setUser(user);
-        } catch (e: any) {
-            console.error(e);
-            throw new Error(e.message || 'Login failed');
-        }
+        // No-op
     };
 
     const signup = async (name: string, email: string, pass: string) => {
-        try {
-            const { token, user } = await apiClient.post('/auth/signup', { name, email, password: pass });
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-            apiClient.setToken(token);
-            setUser(user);
-            return user.id;
-        } catch (e: any) {
-            console.error(e);
-            throw new Error(e.message || 'Signup failed');
-        }
+        return "mock-id";
     };
 
     const verify = async (_email: string, _code: string) => {

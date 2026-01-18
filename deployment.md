@@ -40,4 +40,13 @@ This approach works on Railway, Render, DigitalOcean, etc.
 ## Environment Variables
 - `PORT`: (Default: 3001)
 - `JWT_SECRET`: Secret for auth tokens.
-- `DATABASE_URL`: (Default: file:./forensics.db). For production, ensure the database file is persisted (Docker Volume).
+- `DATABASE_URL`: (Default: `file:./forensics.db`). For production, ensure the database file is persisted (Docker Volume).
+
+## Render.com Specifics (Critical)
+To prevent data loss on restarts/redeploys:
+1.  **Add a Disk**: In your Render Service settings, go to "Disks".
+2.  **Mount Path**: Set the mount path to `/app/data`.
+3.  **Size**: 1GB is sufficient.
+4.  **Environment Variable**: Set `DATABASE_URL` to `file:/app/data/forensics.db`.
+
+*Note: If you used the `render.yaml` Blueprint, this should be configured automatically.*

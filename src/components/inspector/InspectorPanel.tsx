@@ -271,7 +271,7 @@ export default function InspectorPanel({ isOpen, onClose, data, onDataDelete }: 
                         {isEditing ? (
                             <>
                                 {Object.entries(attributes)
-                                    .filter(([key]) => key !== 'profilePicture') // Hide from generic list
+                                    .filter(([key]) => key !== 'profilePicture' && key !== 'attachments') // Hide from generic list
                                     .map(([key, value]) => (
                                         <div key={key} className={styles.property} style={{ display: 'flex', alignItems: 'center' }}>
                                             <div style={{ flex: 1 }}>
@@ -302,7 +302,7 @@ export default function InspectorPanel({ isOpen, onClose, data, onDataDelete }: 
                         ) : (
                             Object.entries(attributes).length > 0 ? (
                                 Object.entries(attributes)
-                                    .filter(([key]) => key !== 'profilePicture') // Hide from generic list
+                                    .filter(([key]) => key !== 'profilePicture' && key !== 'attachments') // Hide from generic list
                                     .map(([key, value]) => (
                                         <div key={key} className={styles.property}>
                                             <span className={styles.label}>{key}</span>

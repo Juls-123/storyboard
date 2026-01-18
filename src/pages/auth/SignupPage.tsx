@@ -32,8 +32,8 @@ export default function SignupPage() {
             <div style={styles.card}>
                 <div style={styles.header}>
                     <Shield size={48} color="#3b82f6" />
-                    <h1 style={styles.title}>NEW AGENT REGISTRATION</h1>
-                    <p style={styles.subtitle}>Forensic Core Clearance</p>
+                    <h1 style={styles.title}>VERITAS</h1>
+                    <p style={styles.subtitle}>Agent Clearance Request</p>
                 </div>
 
                 <form onSubmit={handleSubmit} style={styles.form}>

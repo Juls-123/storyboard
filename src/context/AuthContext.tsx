@@ -31,29 +31,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // AUTH REMOVAL: Auto-login
-        const mockUser: User = {
-            id: 'commander-id',
-            name: 'Commander',
-            email: 'admin@ncis.gov',
-            role: 'OWNER'
-        };
-        setUser(mockUser);
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        if (token && userData) {
+            setUser(JSON.parse(userData));
+            apiClient.setToken(token); // Ensure client has token
+        }
         setIsLoading(false);
     }, []);
 
-    const login = async (_email: string, _pass: string) => {
-        // No-op
+    const login = async (email: string, pass: string) => {
+        try {
+            const { token, user } = await apiClient.post('/auth/login', { email, password: pass });
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            apiClient.setToken(token);
+            setUser(user);
+        } catch (e: any) {
+            console.error(e);
+            throw new Error(e.message || 'Login failed');
+        }
     };
 
-    const signup = async (_name: string, _email: string, _pass: string) => {
-        return 'commander-id';
+    const signup = async (name: string, email: string, pass: string) => {
+        try {
+            const { token, user } = await apiClient.post('/auth/signup', { name, email, password: pass });
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            apiClient.setToken(token);
+            setUser(user);
+            return user.id;
+        } catch (e: any) {
+            console.error(e);
+            throw new Error(e.message || 'Signup failed');
+        }
     };
 
-    const verify = async (_email: string, _code: string) => { };
+    const verify = async (_email: string, _code: string) => {
+        // No-op, verification removed
+    };
 
     const logout = () => {
-        window.location.reload();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        apiClient.setToken(null);
+        setUser(null);
+        window.location.href = '/login';
     };
 
     const hasPermission = (requiredRoles: Role[]) => {
@@ -61,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return requiredRoles.includes(user.role);
     };
 
-    // Deprecated fetchUsers
+    // Fetch users for Team Manager
     const fetchUsers = async () => {
         try {
             const data = await apiClient.get('/users');

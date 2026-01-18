@@ -9,13 +9,11 @@ export const apiClient = {
         headers[key] = value;
     },
 
-    setAuthToken: (token: string) => {
+    setToken: (token: string | null) => {
         if (token) {
-            headers['Authorization'] = `Bearer ${token}`; // Authorization header
-            headers['x-user-id'] = token; // Keeping x-user-id for legacy backend compatibility if needed, or remove if backend uses Bearer
-            // Actually, my backend (index.ts) uses x-user-id OR validates logic. 
-            // My new login returns `token: user.id`. So x-user-id is still the ID.
-            // If I switch to real JWT, I would change this. For now, it works.
+            headers['Authorization'] = `Bearer ${token}`;
+            // Remove legacy header if not needed, or keep for safety if backend checks both
+            headers['x-user-id'] = token;
         } else {
             delete headers['Authorization'];
             delete headers['x-user-id'];

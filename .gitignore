@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Database
+*.db
+*.db-journal
+server/prisma/forensics.db
+
+# Environment
+.env
+.env.local

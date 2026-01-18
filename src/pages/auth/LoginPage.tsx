@@ -15,8 +15,9 @@ export default function LoginPage() {
         try {
             await login(email, password);
             navigate('/');
-        } catch (err) {
-            setError('Invalid credentials or account not verified.');
+        } catch (err: any) {
+            console.error('Login Error:', err);
+            setError(err.message || 'Login failed.');
         }
     };
 

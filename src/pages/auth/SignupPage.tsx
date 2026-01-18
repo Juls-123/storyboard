@@ -18,9 +18,10 @@ export default function SignupPage() {
         setLoading(true);
         try {
             await signup(name, email, password);
-            navigate(`/verify?email=${encodeURIComponent(email)}`);
-        } catch (err) {
-            setError('Failed to create account. Email may be taken.');
+            navigate('/');
+        } catch (err: any) {
+            console.error('Signup Error:', err);
+            setError(err.message || 'Failed to create account.');
         } finally {
             setLoading(false);
         }

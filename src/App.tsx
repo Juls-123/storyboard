@@ -9,10 +9,10 @@ import TimelineView from './pages/TimelineView';
 import HypothesesBoard from './pages/HypothesesBoard';
 import AuditLog from './pages/AuditLog';
 
-// Auth Pages - Removed
-// import LoginPage from './pages/auth/LoginPage';
-// import SignupPage from './pages/auth/SignupPage';
-// import VerificationPage from './pages/auth/VerificationPage';
+// Auth Pages
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
+import VerificationPage from './pages/auth/VerificationPage';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -27,12 +27,12 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public Routes - Redirect to Dashboard */}
-          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/verify" element={<Navigate to="/dashboard" replace />} />
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/verify" element={<VerificationPage />} />
 
-          {/* Protected Routes - Now Open */}
+          {/* Protected Routes */}
           <Route element={<RequireAuth />}>
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />

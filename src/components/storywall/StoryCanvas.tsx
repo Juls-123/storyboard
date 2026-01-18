@@ -6,8 +6,6 @@ import {
     MiniMap,
     useNodesState,
     useEdgesState,
-    addEdge,
-    type Connection,
     BackgroundVariant,
     type Node
 } from '@xyflow/react';

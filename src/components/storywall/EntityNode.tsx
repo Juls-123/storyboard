@@ -41,7 +41,7 @@ export default function EntityNode({ data, selected }: NodeProps) {
                     <>
                         {data.profilePicture ? (
                             <div className={styles.profilePicture}>
-                                <img src={data.profilePicture} alt={data.label as string} />
+                                <img src={data.profilePicture as string} alt={data.label as string} />
                             </div>
                         ) : (
                             <div className={styles.iconWrapper}>{Icon}</div>

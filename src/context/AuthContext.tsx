@@ -49,11 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         autoLogin();
     }, []);
 
-    const login = async (email: string, pass: string) => {
+    const login = async (_email: string, _pass: string) => {
         // No-op
     };
 
-    const signup = async (name: string, email: string, pass: string) => {
+    const signup = async (_name: string, _email: string, _pass: string) => {
         return "mock-id";
     };
 

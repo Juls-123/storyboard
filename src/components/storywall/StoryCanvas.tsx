@@ -31,7 +31,7 @@ export default function StoryCanvas() {
     const [searchParams] = useSearchParams();
     const caseId = searchParams.get('caseId'); // Fixed param name to match Dashboard
 
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [selectedNode, setSelectedNode] = useState<any>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -142,10 +142,29 @@ export default function StoryCanvas() {
     const { user } = useAuth();
     const isAnalyst = user?.role === 'ANALYST';
 
+    const [filterState, setFilterState] = useState({
+        showEvidence: true,
+        showEntities: true
+    });
+
+    const filteredNodes = nodes.filter(n => {
+        if (n.data?.type === 'evidence' && !filterState.showEvidence) return false;
+        if (n.data?.type !== 'evidence' && !filterState.showEntities) return false;
+        return true;
+    });
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }} className={clsx(selectedNode && 'focus-mode')}>
             <ReactFlow
-                nodes={nodes}
+                nodes={filteredNodes}
                 edges={edges}
                 onNodesChange={isAnalyst ? undefined : onNodesChange}
                 onEdgesChange={isAnalyst ? undefined : onEdgesChange}
@@ -180,6 +199,9 @@ export default function StoryCanvas() {
             <CanvasToolbar
                 onAddNode={() => setIsAddModalOpen(true)}
                 onManageTeam={() => setIsTeamModalOpen(true)}
+                onToggleFocus={toggleFullscreen}
+                filterState={filterState}
+                onFilterChange={(key) => setFilterState(prev => ({ ...prev, [key]: !prev[key] }))}
             />
             <InspectorPanel
                 isOpen={!!selectedNode}

@@ -62,7 +62,7 @@ export default function Dashboard() {
                 <div>
                     <h1 className={styles.title}>COMMAND CENTER</h1>
                     <div className={styles.subtitle}>
-                        {user ? `WELCOME, ${user.name.toUpperCase()}` : 'UNIT 42 OVERSIGHT TERMINAL'}
+                        {user ? `WELCOME, ${user.name.toUpperCase()}` : 'VERITAS SYSTEM TERMINAL'}
                     </div>
                 </div>
                 <button className={styles.createBtn} onClick={() => setIsCreateModalOpen(true)}>

@@ -16,7 +16,7 @@ export default function Sidebar() {
     return (
         <aside className={styles.sidebar}>
             <div className={styles.brand}>
-                <h1 className={styles.title}>GIGA FORENSICS</h1>
+                <h1 className={styles.title}>VERITAS</h1>
                 <div className={styles.subtitle}>System Access: Authorized</div>
             </div>
 

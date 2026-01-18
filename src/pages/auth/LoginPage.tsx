@@ -26,8 +26,8 @@ export default function LoginPage() {
             <div style={styles.card}>
                 <div style={styles.header}>
                     <Shield size={48} color="#3b82f6" />
-                    <h1 style={styles.title}>FORENSIC CORE</h1>
-                    <p style={styles.subtitle}>Secure Access Terminal</p>
+                    <h1 style={styles.title}>VERITAS</h1>
+                    <p style={styles.subtitle}>Investigation Management System</p>
                 </div>
 
                 <form onSubmit={handleSubmit} style={styles.form}>
